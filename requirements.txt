@@ -1,1 +1,5 @@
+click==6.7
 PyPokerEngine==1.0.1
+PyPokerGUI==0.0.7
+PyYAML==3.12
+tornado==4.4.2
