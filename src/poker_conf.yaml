@@ -1,9 +1,17 @@
 ai_players:
-- name: fish1
-  path: ./src/fish_player.py
+- name: monte1
+  path: ./src/monte_carlo_bot.py
+- name: monte2
+  path: ./src/monte_carlo_bot.py
+- name: monte3
+  path: ./src/monte_carlo_bot.py
+- name: monte4
+  path: ./src/monte_carlo_bot.py
+- name: monte5
+  path: ./src/monte_carlo_bot.py
 ante: 0
 blind_structure: null
-initial_stack: 100
-max_round: 10
+initial_stack: 10000
+max_round: 1000
 small_blind: 10
 
