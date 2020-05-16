@@ -25,6 +25,19 @@ def montecarlo_simulation(nb_player, hole_card, community_card):
     my_score = HandEvaluator.eval_hand(hole_card, community_card)
     return 1 if my_score >= max(opponents_score) else 0
 
+def calculate_players_remaining(players):
+    remaining_players = 0
+    
+    for player in players:
+        if player['state'] == 'participating':
+            remaining_players += 1
+
+    return remaining_players
+
+def clamp(num, min_value, max_value):
+    return max(min(num, max_value), min_value)
+
+
 
 class MonteCarloBot(BasePokerPlayer):
     def __init__(self):
@@ -46,14 +59,22 @@ class MonteCarloBot(BasePokerPlayer):
 
         amount = None
 
+        # Calculate favorable odds on remaining players
+        favorable_odds = 1 / self.players_remaining
+        min_raise_odds = favorable_odds + (favorable_odds * 0.2)
+        max_raise_odds = favorable_odds + (favorable_odds * 0.8)
+
+        min_raise_odds = clamp(min_raise_odds, 0, 1)
+        max_raise_odds = clamp(max_raise_odds, 0, 1)
+
         # If the win rate is large enough, then raise
-        if win_rate > 0.5:
+        if win_rate > favorable_odds:
             raise_amount_options = [item for item in valid_actions if item['action'] == 'raise'][0]['amount']
-            if win_rate > 0.85:
+            if win_rate > max_raise_odds:
                 # If it is extremely likely to win, then raise as much as possible
                 action = 'raise'
                 amount = raise_amount_options['max']
-            elif win_rate > 0.75:
+            elif win_rate > min_raise_odds:
                 # If it is likely to win, then raise by the minimum amount possible
                 action = 'raise'
                 amount = raise_amount_options['min']
@@ -74,6 +95,7 @@ class MonteCarloBot(BasePokerPlayer):
         self.num_players = game_info['player_num']
 
     def receive_round_start_message(self, round_count, hole_card, seats):
+        self.players_remaining = calculate_players_remaining(seats)
         pass
 
     def receive_street_start_message(self, street, round_state):
