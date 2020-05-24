@@ -45,51 +45,69 @@ class MonteCarloBot(BasePokerPlayer):
         self.wins = 0
         self.losses = 0
 
+    def ActPass(self, valid_actions):
+        #print('Pass')
+        for act in valid_actions:
+            if (act["action"] == 'call'):
+                if (act["amount"] == 0):
+                    return act["action"], act["amount"]
+                break
+        return 'fold', 0
+   
+    def ActCall(self, valid_actions):
+       # print('Call')
+        for act in valid_actions:
+            if (act["action"] == 'call'):
+                    return act["action"], act["amount"]
+        return 'fold', 0
+   
+    def ActRaise_x1(self, valid_actions):
+        #print('RaiseMin')
+        for act in valid_actions:
+            if (act["action"] == 'raise'):
+                return act["action"], act["amount"]["min"]
+        return self.ActCall(valid_actions)
+
+    def ActRaise_x2(self, valid_actions):
+        #print('RaiseMin')
+        for act in valid_actions:
+            if (act["action"] == 'raise'):
+                return self.ActRaise(valid_actions, act["amount"]["min"]*2)
+
+        return self.ActCall(valid_actions)
+ 
+    def ActRaise(self, valid_actions, amount):
+        #print('Raise')
+        for act in valid_actions:
+            if (act["action"] == 'raise'):
+                if (amount >= act["amount"]["min"]):
+                    if (amount <= act["amount"]["max"]):
+                        print('wasd1')
+                        return act["action"], amount
+                    else:
+                        print('wasd2')
+                        return act["action"], act["amount"]["max"]
+                elif (act["amount"]["min"] == -1):
+                    return self.ActCall(valid_actions)
+                else:
+                    print('wasd3')
+                    return act["action"], act["amount"]["min"]
+
+    vChanceCall  = {'preflop': 0.13, 'flop': 0.3, 'turn': 0.4, 'river':0.7}
+    vChanceRaise_x1  = {'preflop': 0.17, 'flop': 0.45, 'turn': 0.47, 'river':0.8}
+    vChanceRaise_x2  = {'preflop': 0.20, 'flop': 0.55, 'turn': 0.47, 'river':0.9}
     def declare_action(self, valid_actions, hole_card, round_state):
         # Estimate the win rate
-        win_rate = estimate_win_rate(100, self.num_players, hole_card, round_state['community_card'])
+        win_rate = estimate_win_rate(100, self.players_remaining, hole_card, round_state['community_card'])
 
-        # Check whether it is possible to call
-        can_call = len([item for item in valid_actions if item['action'] == 'call']) > 0
-        if can_call:
-            # If so, compute the amount that needs to be called
-            call_amount = [item for item in valid_actions if item['action'] == 'call'][0]['amount']
+        if (win_rate > self.vChanceRaise_x2[round_state['street']]):
+            return self.ActRaise_x2(valid_actions)
+        if (win_rate > self.vChanceRaise_x1[round_state['street']]):
+            return self.ActRaise_x1(valid_actions)
+        elif (win_rate > self.vChanceCall[round_state['street']]):
+            return self.ActCall(valid_actions)
         else:
-            call_amount = 0
-
-        amount = None
-
-        # Calculate favorable odds on remaining players
-        favorable_odds = 1 / self.players_remaining
-        min_raise_odds = favorable_odds + (favorable_odds * 0.2)
-        max_raise_odds = favorable_odds + (favorable_odds * 0.8)
-
-        min_raise_odds = clamp(min_raise_odds, 0, 1)
-        max_raise_odds = clamp(max_raise_odds, 0, 1)
-
-        # If the win rate is large enough, then raise
-        if win_rate > favorable_odds:
-            raise_amount_options = [item for item in valid_actions if item['action'] == 'raise'][0]['amount']
-            if win_rate > max_raise_odds:
-                # If it is extremely likely to win, then raise as much as possible
-                action = 'raise'
-                amount = raise_amount_options['max']
-            elif win_rate > min_raise_odds:
-                # If it is likely to win, then raise by the minimum amount possible
-                action = 'raise'
-                amount = raise_amount_options['min']
-            else:
-                # If there is a chance to win, then call
-                action = 'call'
-        else:
-            action = 'call' if can_call and call_amount == 0 else 'fold'
-
-        # Set the amount
-        if amount is None:
-            items = [item for item in valid_actions if item['action'] == action]
-            amount = items[0]['amount']
-
-        return action, amount
+            return self.ActPass(valid_actions)
 
     def receive_game_start_message(self, game_info):
         self.num_players = game_info['player_num']
