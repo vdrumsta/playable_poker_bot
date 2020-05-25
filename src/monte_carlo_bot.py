@@ -82,15 +82,12 @@ class MonteCarloBot(BasePokerPlayer):
             if (act["action"] == 'raise'):
                 if (amount >= act["amount"]["min"]):
                     if (amount <= act["amount"]["max"]):
-                        print('wasd1')
                         return act["action"], amount
                     else:
-                        print('wasd2')
                         return act["action"], act["amount"]["max"]
                 elif (act["amount"]["min"] == -1):
                     return self.ActCall(valid_actions)
                 else:
-                    print('wasd3')
                     return act["action"], act["amount"]["min"]
 
     vChanceCall  = {'preflop': 0.13, 'flop': 0.3, 'turn': 0.4, 'river':0.7}

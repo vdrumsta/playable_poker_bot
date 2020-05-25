@@ -11,7 +11,7 @@ ai_players:
   path: ./src/monte_carlo_bot.py
 ante: 0
 blind_structure: null
-initial_stack: 10000
-max_round: 1000
-small_blind: 10
+initial_stack: 1000
+max_round: 10000
+small_blind: 5
 
