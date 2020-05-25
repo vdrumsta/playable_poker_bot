@@ -1,6 +1,9 @@
 # playable_poker_bot
 A simple monte carlo implementation of a texas hold'em no limit poker bot that you can play against using PyPokerEngine library.
 
+<p align="center">
+  <img src="https://github.com/worm00111/playable_poker_bot/blob/master/other/Screenshot.png">
+</p>
 
 ## Getting Started
 
