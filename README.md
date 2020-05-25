@@ -31,3 +31,5 @@ Start the graphical interface (playable on http://localhost:8000/):
 ```
 pypokergui serve src/poker_conf.yaml --port 8000 --speed moderate
 ```
+
+You can adjust starting poker game configuration inside src/poker_conf.yaml file
